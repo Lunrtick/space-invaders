@@ -1,0 +1,14 @@
+{
+  "name": "space-invaders",
+  "version": "0.0.1",
+  "description": "A TS based space invaders game",
+  "main": "index.js",
+  "repository": "https://github.com/Lunrtick/space-invaders",
+  "author": "Gabriel Soicher",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "tslint": "^5.20.1",
+    "typescript": "^3.7.4"
+  }
+}
