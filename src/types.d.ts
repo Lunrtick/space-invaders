@@ -1,23 +1,33 @@
-declare const enum Shape {
-    square,
-    round
-}
+type Shape = 'square' | 'round';
 
-declare const enum GameEvent {
-    SHOOT,
-    MOVE_LEFT,
-    MOVE_RIGHT,
-    IMPACT
-}
+type GameEvent = 'shoot' | 'impact';
 
 interface GameObjectOptions {
     x: number,
     y: number,
     width: number,
     height: number,
-    shape: Shape;
+    shape?: Shape;
     mass: number;
     max_health: number;
+    bearing?: number;
+}
+
+interface GameEventRequest {
+    source: import('./game-objects/GameObject').GameObject;
+    event: GameEvent;
+    payload: any;
+}
+
+interface BulletSpec {
+    x: number;
+    y: number;
+    bearing: number;
+}
+
+interface ShootEventRequest {
+    event: 'shoot';
+    payload: BulletSpec;
 }
 
 interface Renderable {
@@ -30,9 +40,10 @@ interface Reactive {
 
 
 interface GameConfig {
-
+    objects: GameObjectOptions[];
+    dimensions: { width: number, height: number; };
 }
 
 interface KeyMap {
-    [key: string]: () => any;
+    [key: string]: boolean;
 }

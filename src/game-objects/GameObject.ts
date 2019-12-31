@@ -1,21 +1,24 @@
 import { GameController } from "../GameController";
-
+import { Shape } from '../enums';
 export class GameObject implements Renderable, Reactive {
-    private health: number;
-    private max_health: number;
+    protected health: number;
+    protected max_health: number;
 
-    private mass: number;
-    private velocity: number = 0;
+    protected mass: number;
+    protected velocity: number = 0;
 
-    private x: number;
-    private y: number;
-    private width: number;
-    private height: number;
-    private shape: Shape;
+    protected x: number;
+    protected y: number;
+    protected bearing: number;
+    protected width: number;
+    protected height: number;
+    protected shape: Shape;
 
-    private game_controller: GameController;
+    protected game_controller: GameController;
 
-    constructor(options: GameObjectOptions, gc: GameController) {
+    protected rendering_context: CanvasRenderingContext2D;
+
+    constructor(options: GameObjectOptions, gc: GameController, ctx: CanvasRenderingContext2D) {
         this.max_health = options.max_health;
         this.health = this.max_health;
 
@@ -25,16 +28,28 @@ export class GameObject implements Renderable, Reactive {
         this.y = options.y;
         this.width = options.width;
         this.height = options.height;
-        this.shape = options.shape;
+        this.shape = options.shape ?? Shape.square;
+        this.bearing = options.bearing ?? 90; // horizontal to the right
 
         this.game_controller = gc;
+
+        this.rendering_context = ctx;
     }
 
     render() {
-        console.log("NIY: render");
+    }
+
+    handleInteraction(km: KeyMap, ncks: Set<string>, time_step: number) {
     }
 
     react(e: GameEvent) {
-        console.log("NIY: react");
+    }
+
+    act(time_step: number) {
+
+    }
+
+    isOutOfBox(xMin: number, xMax: number, yMin: number, yMax: number) {
+        return this.x < xMin || this.x > xMax || this.y < yMin || this.y > yMax;
     }
 }

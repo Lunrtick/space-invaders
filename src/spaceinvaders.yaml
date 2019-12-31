@@ -1,0 +1,11 @@
+Player:
+    health: 3
+    mass: 10
+    x: 50
+    y: 0
+    width: 5
+    height: 5
+    events:
+     - MOVE_LEFT: ArrowLeft
+     - MOVE_RIGHT: ArrowRight
+     - SHOOT: Space
