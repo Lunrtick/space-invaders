@@ -68,7 +68,9 @@ export class GameController {
 
     renderGameObjects(): void {
         this.objects.forEach(o => {
-            o.render();
+            if (o.can('render')) {
+                (o as GameObject & Renderable).render();
+            }
         });
     };
 
@@ -77,7 +79,11 @@ export class GameController {
         this.time_step = (this.last_time - now) / 1000; // ms to s
         this.drawBackground();
 
-        this.objects.forEach(o => o.handleInteraction(this.keyboard_manager.keymap, this.keyboard_manager.non_continuous_keys, this.time_step));
+        this.objects.forEach(o => {
+            if (o.can('interact')) {
+                (o as Interactive & GameObject).handleInteraction(this.keyboard_manager.keymap, this.keyboard_manager.non_continuous_keys, this.time_step);
+            }
+        });
 
         this.objects.forEach(o => o.act(this.time_step));
 

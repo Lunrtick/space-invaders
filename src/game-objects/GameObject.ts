@@ -1,11 +1,17 @@
 import { GameController } from "../GameController";
 import { Shape } from '../enums';
-export class GameObject implements Renderable, Reactive {
+
+export class GameObject {
+    protected capabilities: GameObjectCapabilities = {
+        act: true
+    };
+
     protected health: number;
     protected max_health: number;
 
     protected mass: number;
     protected velocity: number = 0;
+    protected v_max: number = 10e9;
 
     protected x: number;
     protected y: number;
@@ -36,17 +42,12 @@ export class GameObject implements Renderable, Reactive {
         this.rendering_context = ctx;
     }
 
-    render() {
-    }
-
-    handleInteraction(km: KeyMap, ncks: Set<string>, time_step: number) {
-    }
-
-    react(e: GameEvent) {
-    }
-
     act(time_step: number) {
 
+    }
+
+    can(action: string): boolean {
+        return this.capabilities[action];
     }
 
     isOutOfBox(xMin: number, xMax: number, yMin: number, yMax: number) {

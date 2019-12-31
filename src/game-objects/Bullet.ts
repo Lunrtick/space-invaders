@@ -1,7 +1,11 @@
 import { GameObject } from "./GameObject";
 import { GameController } from "../GameController";
 const degToRad = Math.PI / 180;
-export class Bullet extends GameObject {
+export class Bullet extends GameObject implements Renderable {
+    protected capabilities: GameObjectCapabilities = {
+        render: true,
+        act: true
+    };
 
     public source: GameObject;
 

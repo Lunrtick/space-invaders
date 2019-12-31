@@ -2,6 +2,10 @@ type Shape = 'square' | 'round';
 
 type GameEvent = 'shoot' | 'impact';
 
+interface GameObjectCapabilities {
+    [key: string]: boolean;
+}
+
 interface GameObjectOptions {
     x: number,
     y: number,
@@ -36,6 +40,10 @@ interface Renderable {
 
 interface Reactive {
     react(event: GameEvent): void;
+}
+
+interface Interactive {
+    handleInteraction(km: KeyMap, ncks: Set<string>, time_step: number): void;
 }
 
 
