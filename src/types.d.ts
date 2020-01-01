@@ -1,6 +1,9 @@
+
 type Shape = 'square' | 'round';
 
-type GameEvent = 'shoot' | 'impact';
+type GameEvent = 'shoot' | 'collide';
+
+type GameObjectType = 'player' | 'enemy' | 'bullet';
 
 interface GameObjectCapabilities {
     [key: string]: boolean;
@@ -15,6 +18,14 @@ interface GameObjectOptions {
     mass: number;
     max_health: number;
     bearing?: number;
+    type: GameObjectType;
+}
+
+interface Rectangle {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
 }
 
 interface GameEventRequest {
@@ -34,8 +45,21 @@ interface ShootEventRequest {
     payload: BulletSpec;
 }
 
+interface CollideEventRequest {
+    event: 'collide';
+    payload: import('./game-objects/GameObject').GameObject;
+}
+
 interface Renderable {
     render(): void;
+}
+
+interface CanActivelyCollide {
+    listCollisions(): import('./game-objects/GameObject').GameObject[];
+}
+
+interface Collidable {
+    handleCollision(source: import('./game-objects/GameObject').GameObject): void;
 }
 
 interface Reactive {

@@ -1,7 +1,9 @@
 import { GameObject } from "./GameObject";
 import { GameController } from "../GameController";
-const degToRad = Math.PI / 180;
-export class Bullet extends GameObject implements Renderable {
+export class Bullet extends GameObject implements Renderable, CanActivelyCollide, Collidable {
+    handleCollision(source: GameObject): void {
+        this.health -= 1;
+    }
     protected capabilities: GameObjectCapabilities = {
         render: true,
         act: true
@@ -20,12 +22,30 @@ export class Bullet extends GameObject implements Renderable {
     }
 
     act(time_step: number) {
+        const collisions = this.listCollisions();
+        collisions.forEach(c => {
+            console.log(c);
+            this.game_controller.dispatchEvent({
+                event: 'collide',
+                payload: c,
+                source: this
+            });
+        });
+
         this.velocity += 5;
-        const delta_x = this.velocity * Math.cos(this.bearing * degToRad) * time_step;
-        const delta_y = this.velocity * Math.sin(this.bearing * degToRad) * time_step;
-        this.x += delta_x;
-        this.y += delta_y;
+        this.x += this.getDeltaX(this.velocity, this.bearing, time_step);
+        this.y += this.getDeltaY(this.velocity, this.bearing, time_step);
     }
+
+    listCollisions() {
+        return Array.from(this.game_controller.getGameObjects()).reduce((acc, [id, o]) => {
+            if (o !== this && o !== this.source && o.can('collide') && o.willCollide(this, o)) {
+                acc.push(o);
+            }
+            return acc;
+        }, [] as GameObject[]);
+    }
+
 }
 
 
@@ -39,6 +59,7 @@ export function createBullet(b: BulletSpec, source: GameObject, gc: GameControll
         x: b.x,
         y: b.y,
         bearing: b.bearing,
-        shape: "square"
+        shape: "square",
+        type: 'bullet'
     }, gc, ctx, source);
 }

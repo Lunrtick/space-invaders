@@ -28,7 +28,7 @@ export class Player extends GameObject implements Renderable, Interactive {
             this.has_been_moved = false;
         }
 
-        if (ncks.has('Space')) {
+        if (ncks.has('Space') || ncks.has('ArrowUp')) {
             this.game_controller.dispatchEvent({
                 source: this,
                 event: 'shoot',

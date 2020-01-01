@@ -1,4 +1,4 @@
-export const non_continuous_key_codes = new Set(['Space']);
+export const non_continuous_key_codes = new Set(['Space', 'ArrowUp']);
 
 
 export class KeyboardManager {

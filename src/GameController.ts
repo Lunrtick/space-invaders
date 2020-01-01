@@ -2,10 +2,11 @@ import { GameObject } from "./game-objects/GameObject";
 import { Player } from "./game-objects/Player";
 import { KeyboardManager } from "./KeyboardManager";
 import { Bullet, createBullet } from "./game-objects/Bullet";
+import { Enemy } from "./game-objects/Enemy";
 
 export class GameController {
     private drawing_canvas: HTMLCanvasElement;
-    private objects: GameObject[] = [];
+    private objects: Map<string, GameObject> = new Map;
     private event_queue: GameEvent[] = [];
 
     public scale: { x: number; y: number; };
@@ -24,12 +25,15 @@ export class GameController {
         this.drawing_canvas = canvas;
         this.scale = this.getScale(game_config.dimensions.width, game_config.dimensions.height);
         this.config = this.adjustConfig(game_config, canvas);
-        this.initGameObjects();
         this.last_time = Date.now();
     }
 
     getScale(width: number, height: number) {
         return { x: this.drawing_canvas.width / width, y: this.drawing_canvas.height / height };
+    }
+
+    getGameObjects() {
+        return this.objects;
     }
 
     private adjustConfig(game_config: GameConfig, canvas: HTMLCanvasElement) {
@@ -51,9 +55,17 @@ export class GameController {
             case 'shoot':
                 const ctx = this.drawing_canvas.getContext('2d');
                 if (ctx) {
-                    this.objects.push(createBullet(er.payload, er.source, this, this.scale, ctx));
+                    const nb = createBullet(er.payload, er.source, this, this.scale, ctx);
+                    this.objects.set(nb.id, nb);
                 }
                 break;
+            case 'collide':
+                const e = er as CollideEventRequest;
+                const p = er.payload as Collidable & GameObject;
+                const s = er.source as CanActivelyCollide & Collidable & GameObject;
+                p.handleCollision(s);
+                s.handleCollision(p);
+
         }
     }
 
@@ -61,7 +73,16 @@ export class GameController {
         const ctx = this.drawing_canvas.getContext('2d');
         if (ctx) {
             this.config.objects.forEach(o => {
-                this.objects.push(new Player(o, this, ctx));
+                switch (o.type) {
+                    case 'player':
+                        const np = new Player(o, this, ctx);
+                        this.objects.set(np.id, np);
+                        break;
+                    case 'enemy':
+                        const ne = new Enemy(o, this, ctx);
+                        this.objects.set(ne.id, ne);
+                        break;
+                }
             });
         }
     };
@@ -86,6 +107,8 @@ export class GameController {
         });
 
         this.objects.forEach(o => o.act(this.time_step));
+
+        this.removeDeadGameObjects();
 
         this.renderGameObjects();
 
@@ -113,15 +136,19 @@ export class GameController {
         };
     }
 
-    clearObjects() {
-        const removals: number[] = [];
-        this.objects.forEach((o, idx) => {
-            if (o.isOutOfBox(0, this.drawing_canvas.width, 0, this.drawing_canvas.height)) {
-                removals.push(idx);
+    removeDeadGameObjects() {
+        this.objects.forEach((o) => {
+            if (o.isDead()) {
+                this.objects.delete(o.id);
             }
         });
-        removals.forEach(r => {
-            this.objects.splice(r, 1);
+    }
+
+    clearObjects() {
+        this.objects.forEach((o, idx) => {
+            if (o instanceof Bullet && o.isOutOfBox(0, this.drawing_canvas.width, 0, this.drawing_canvas.height)) {
+                this.objects.delete(o.id);
+            }
         });
     }
 
