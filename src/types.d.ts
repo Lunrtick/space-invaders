@@ -1,12 +1,22 @@
-
 type Shape = 'square' | 'round';
 
 type GameEvent = 'shoot' | 'collide';
 
 type GameObjectType = 'player' | 'enemy' | 'bullet';
 
+type Nullable<T> = T | null;
+
+type NullableGameObject = Nullable<import('./game-objects/GameObject').GameObject>;
+
 interface GameObjectCapabilities {
     [key: string]: boolean;
+}
+
+interface GameObjectGroupEdgeMap {
+    left: NullableGameObject;
+    right: NullableGameObject;
+    top: NullableGameObject;
+    bottom: NullableGameObject;
 }
 
 interface GameObjectOptions {
@@ -15,6 +25,7 @@ interface GameObjectOptions {
     width: number,
     height: number,
     shape?: Shape;
+    group?: string;
     mass: number;
     max_health: number;
     bearing?: number;
@@ -70,9 +81,13 @@ interface Interactive {
     handleInteraction(km: KeyMap, ncks: Set<string>, time_step: number): void;
 }
 
+interface GameObjectGroupConfig {
+
+}
 
 interface GameConfig {
     objects: GameObjectOptions[];
+    groups?: string[];
     dimensions: { width: number, height: number; };
 }
 

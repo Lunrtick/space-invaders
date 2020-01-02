@@ -16,15 +16,23 @@ export class Enemy extends GameObject implements Collidable {
         collide: true
     };
 
-    render() {
-        this.rendering_context.fillStyle = this.max_health > 2 ? 'rgb(0, 0, 255)' : 'rgb(123, 80, 200)';
-        this.rendering_context.fillRect(this.x, this.y, this.width, this.height);
+    getColour(): string {
+        return 'rgb(123, 80, 200)';
+    }
 
+    renderDamage() {
         this.rendering_context.fillStyle = 'rgb(0, 0, 0)';
         const damage_width = this.width / this.max_health;
         for (let i = 0; i < this.max_health - this.health; i++) {
             this.rendering_context.fillRect(this.x + i * damage_width, this.y, damage_width, this.height - 2);
         }
+    }
+
+    render() {
+        this.rendering_context.fillStyle = this.getColour();
+        this.rendering_context.fillRect(this.x, this.y, this.width, this.height);
+
+        this.renderDamage();
     }
 
     act(time_step: number) {
@@ -48,6 +56,22 @@ export class Enemy extends GameObject implements Collidable {
                 this.y += bounding_dims.y.max / 20;
             }
 
+            this.shoot(0.4);
+
+        }
+    }
+
+    public shoot(chance = 0.0005) {
+        if (Math.random() < chance) {
+            this.game_controller.dispatchEvent({
+                source: this,
+                event: 'shoot',
+                payload: {
+                    x: this.x + this.width / 2 - 12 * this.game_controller.scale.x,
+                    y: this.y,
+                    bearing: 270 + Math.random() * 50 * this.getPosOrNeg()
+                }
+            });
         }
     }
 

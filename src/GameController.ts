@@ -3,10 +3,12 @@ import { Player } from "./game-objects/Player";
 import { KeyboardManager } from "./KeyboardManager";
 import { Bullet, createBullet } from "./game-objects/Bullet";
 import { Enemy } from "./game-objects/Enemy";
+import { GameObjectGroup } from "./game-objects/GameObjectGroup";
+import { EnemyGroup } from "./game-objects/EnemyGroup";
 
 export class GameController {
     private drawing_canvas: HTMLCanvasElement;
-    private objects: Map<string, GameObject> = new Map;
+    private objects: Map<string, GameObject | GameObjectGroup> = new Map;
     private event_queue: GameEvent[] = [];
 
     public scale: { x: number; y: number; };
@@ -65,7 +67,6 @@ export class GameController {
                 const s = er.source as CanActivelyCollide & Collidable & GameObject;
                 p.handleCollision(s);
                 s.handleCollision(p);
-
         }
     }
 
@@ -84,8 +85,26 @@ export class GameController {
                         break;
                 }
             });
+            this.config.groups?.forEach(name => {
+
+                const g = new EnemyGroup(name, this, ctx);
+                this.objects.set(g.id, g);
+
+                g.updateObjects(this.getObjectsInGroup(name));
+
+            });
         }
     };
+
+    getObjectsInGroup(name: string) {
+        const obs_in_group: GameObject[] = [];
+        this.objects.forEach(o => {
+            if (o instanceof GameObject && o.group === name) {
+                obs_in_group.push(o);
+            }
+        });
+        return obs_in_group;
+    }
 
     renderGameObjects(): void {
         this.objects.forEach(o => {
@@ -106,11 +125,19 @@ export class GameController {
             }
         });
 
-        this.objects.forEach(o => o.act(this.time_step));
+        this.objects.forEach(o => {
+            if (o instanceof GameObject && !o.group) {
+                o.act(this.time_step);
+            } else if (o instanceof GameObjectGroup) {
+                o.act(this.time_step);
+            }
+        });
 
         this.removeDeadGameObjects();
 
         this.renderGameObjects();
+
+        this.updateGroups();
 
         this.last_time = now;
 
@@ -121,6 +148,14 @@ export class GameController {
         this.clearObjects();
         this.keyboard_manager.clearNonContinuousKeys();
 
+    }
+
+    updateGroups() {
+        this.objects.forEach(o => {
+            if (o instanceof GameObjectGroup) {
+                o.updateObjects(this.getObjectsInGroup(o.name));
+            }
+        });
     }
 
     getBoundingDimensions() {
@@ -140,6 +175,7 @@ export class GameController {
         this.objects.forEach((o) => {
             if (o.isDead()) {
                 this.objects.delete(o.id);
+                o.destroy();
             }
         });
     }
@@ -148,6 +184,7 @@ export class GameController {
         this.objects.forEach((o, idx) => {
             if (o instanceof Bullet && o.isOutOfBox(0, this.drawing_canvas.width, 0, this.drawing_canvas.height)) {
                 this.objects.delete(o.id);
+                o.destroy();
             }
         });
     }

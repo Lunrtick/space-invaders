@@ -32,18 +32,25 @@ export class Bullet extends GameObject implements Renderable, CanActivelyCollide
             });
         });
 
-        this.velocity += 5;
+        this.velocity += 2;
         this.x += this.getDeltaX(this.velocity, this.bearing, time_step);
         this.y += this.getDeltaY(this.velocity, this.bearing, time_step);
     }
 
     listCollisions() {
         return Array.from(this.game_controller.getGameObjects()).reduce((acc, [id, o]) => {
-            if (o !== this && o !== this.source && o.can('collide') && o.willCollide(this, o)) {
+            if (
+                o.constructor.name !== this.source.constructor.name
+                && o instanceof GameObject &&
+                o.can('collide') && o.willCollide(this, o)) {
                 acc.push(o);
             }
             return acc;
         }, [] as GameObject[]);
+    }
+
+    destroy() {
+        console.log("Ded Bullet");
     }
 
 }

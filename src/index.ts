@@ -22,18 +22,33 @@ const game_config: GameConfig = {
         max_health: 5,
         type: 'enemy'
     }],
-    dimensions: { width: 1000, height: 1000 }
+    dimensions: { width: 1000, height: 1000 },
+    groups: [
+        'main-enemy-group'
+    ]
+
 };
 
 for (let i = 0; i < (game_config.dimensions.width - 150) / 50; i++) {
     game_config.objects.push({
-        x: 50 * i,
-        y: 50 * i,
+        x: 50 * i * 1.1,
+        y: 200,
         width: 48,
         height: 48,
         mass: 3,
         max_health: 1,
-        type: 'enemy'
+        type: 'enemy' as GameObjectType,
+        group: 'main-enemy-group'
+    });
+    game_config.objects.push({
+        x: 50 * i * 1.1,
+        y: 300,
+        width: 48,
+        height: 48,
+        mass: 3,
+        max_health: 1,
+        type: 'enemy' as GameObjectType,
+        group: 'main-enemy-group'
     });
 }
 

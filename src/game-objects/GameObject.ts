@@ -3,7 +3,7 @@ import { degToRad } from '../utils/index';
 
 let current = 1;
 function getId() {
-    const id = current.toString();
+    const id = `GObj - ${current}`;
     current += 1;
     return id;
 }
@@ -12,6 +12,8 @@ export class GameObject {
     protected capabilities: GameObjectCapabilities = {
         act: true
     };
+
+    public group?: string;
 
     public id: string;
 
@@ -50,6 +52,8 @@ export class GameObject {
         this.game_controller = gc;
 
         this.rendering_context = ctx;
+
+        this.group = options.group;
     }
 
     act(time_step: number) {
@@ -82,12 +86,16 @@ export class GameObject {
                 r1.x + r1.width > r2.x &&
                 r1.y < r2.y + r2.height &&
                 r1.y + r1.height > r2.y) {
-                return true;
+                return this;
             } else {
-                return false;
+                return null;
             }
         } else {
             throw new Error('circle?');
         }
+    }
+
+    destroy() {
+        console.log(`${this.id} says baaaaaii`);
     }
 }

@@ -1,20 +1,31 @@
 import { GameObject } from "./GameObject";
 
 
-export class Player extends GameObject implements Renderable, Interactive {
+export class Player extends GameObject implements Renderable, Interactive, Collidable {
     protected capabilities: GameObjectCapabilities = {
         render: true,
         interact: true,
-        act: true
+        act: true,
+        collide: true
     };
 
     protected v_max = 250;
 
     private has_been_moved = false;
 
+    renderDamage() {
+        this.rendering_context.fillStyle = 'rgb(0, 0, 0)';
+        const damage_width = this.width / this.max_health;
+        for (let i = 0; i < this.max_health - this.health; i++) {
+            this.rendering_context.fillRect(this.x + i * damage_width, this.y, damage_width, this.height - 2);
+        }
+    }
+
     render() {
         this.rendering_context.fillStyle = 'rgb(255, 0, 0)';
         this.rendering_context.fillRect(this.x, this.y, this.width, this.height);
+
+        this.renderDamage();
     }
 
     handleInteraction(km: KeyMap, ncks: Set<string>, time_step: number) {
@@ -71,6 +82,11 @@ export class Player extends GameObject implements Renderable, Interactive {
         } else {
             this.x = x_res;
         }
+    }
+
+    handleCollision() {
+        console.log('ouch');
+        this.health -= 1;
     }
 }
 
