@@ -1,14 +1,14 @@
 import { GameObject } from "./GameObject";
-
+import { Enemy } from './Enemy';
+import { Bullet } from "./Bullet";
 
 export class Player extends GameObject implements Renderable, Interactive, Collidable {
-    protected capabilities: GameObjectCapabilities = {
-        render: true,
-        interact: true,
-        act: true,
-        collide: true
-    };
-
+    protected capabilities: GameObjectCapabilities = new Set([
+        'render',
+        'interact',
+        'act',
+        'collide',
+    ]);
     protected v_max = 250;
 
     private has_been_moved = false;
@@ -46,8 +46,8 @@ export class Player extends GameObject implements Renderable, Interactive, Colli
                 payload: {
                     x: this.x + this.width / 2 - 12 * this.game_controller.scale.x,
                     y: this.y,
-                    bearing: 90
-                }
+                    bearing: 90,
+                } as BulletSpec
             });
         }
 
@@ -84,9 +84,14 @@ export class Player extends GameObject implements Renderable, Interactive, Colli
         }
     }
 
-    handleCollision() {
-        console.log('ouch');
-        this.health -= 1;
+    handleCollision(source: GameObject) {
+        if (this.allowedTo('reflect', source)) {
+
+        }
+        else if (this.allowedTo('collide', source)) {
+            console.log('ouch');
+            this.health -= 1;
+        }
     }
 }
 

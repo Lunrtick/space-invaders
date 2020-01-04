@@ -9,9 +9,9 @@ function getId() {
 }
 
 export class GameObject {
-    protected capabilities: GameObjectCapabilities = {
-        act: true
-    };
+    protected capabilities: GameObjectCapabilities = new Set([
+        'act',
+    ]);
 
     public group?: string;
 
@@ -60,12 +60,16 @@ export class GameObject {
 
     }
 
+    allowedTo(action: string, o: GameObject) {
+        return this.game_controller.allows(this, action, o);
+    }
+
     isDead() {
         return this.health <= 0;
     }
 
     can(action: string): boolean {
-        return this.capabilities[action];
+        return this.capabilities.has(action);
     }
 
     isOutOfBox(xMin: number, xMax: number, yMin: number, yMax: number) {

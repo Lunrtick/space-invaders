@@ -1,20 +1,23 @@
 import { GameObject } from "./GameObject";
-
+import { Player } from './Player';
 import { degToRad } from '../utils/index';
 
 export class Enemy extends GameObject implements Collidable {
+
     handleCollision(source: GameObject & CanActivelyCollide): void {
-        this.health -= 1;
+        if (this.allowedTo('collide', source)) {
+            this.health -= 1;
+        }
     }
     protected v_max = 30;
 
     private step = 0;
 
-    protected capabilities = {
-        render: true,
-        act: true,
-        collide: true
-    };
+    protected capabilities: GameObjectCapabilities = new Set([
+        'render',
+        'act',
+        'collide',
+    ]);
 
     getColour(): string {
         return 'rgb(123, 80, 200)';
@@ -69,8 +72,10 @@ export class Enemy extends GameObject implements Collidable {
                 payload: {
                     x: this.x + this.width / 2 - 12 * this.game_controller.scale.x,
                     y: this.y,
-                    bearing: 270 + Math.random() * 50 * this.getPosOrNeg()
-                }
+                    bearing: 270 + Math.random() * 50 * this.getPosOrNeg(),
+                    collides_with: new Set([Player.name]),
+                    doesnt_collide_with: new Set([this.constructor.name])
+                } as BulletSpec
             });
         }
     }

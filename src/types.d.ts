@@ -8,9 +8,8 @@ type Nullable<T> = T | null;
 
 type NullableGameObject = Nullable<import('./game-objects/GameObject').GameObject>;
 
-interface GameObjectCapabilities {
-    [key: string]: boolean;
-}
+
+type GameObjectCapabilities = Set<string>;
 
 interface GameObjectGroupEdgeMap {
     left: NullableGameObject;
@@ -84,11 +83,14 @@ interface Interactive {
 interface GameObjectGroupConfig {
 
 }
+type RuleFunction = (o1: import('./game-objects/GameObject').GameObject, o2: import('./game-objects/GameObject').GameObject) => void;
+type RuleMap = Map<string, RuleFunction>;
 
 interface GameConfig {
     objects: GameObjectOptions[];
     groups?: string[];
     dimensions: { width: number, height: number; };
+    rules: RuleMap;
 }
 
 interface KeyMap {

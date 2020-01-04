@@ -13,6 +13,8 @@ export class GameController {
 
     public scale: { x: number; y: number; };
 
+    private rules: RuleMap;
+
     private config: GameConfig;
 
     private keyboard_manager: KeyboardManager;
@@ -28,6 +30,7 @@ export class GameController {
         this.scale = this.getScale(game_config.dimensions.width, game_config.dimensions.height);
         this.config = this.adjustConfig(game_config, canvas);
         this.last_time = Date.now();
+        this.rules = game_config.rules;
     }
 
     getScale(width: number, height: number) {
@@ -52,6 +55,15 @@ export class GameController {
         };
     }
 
+    allows(o1: GameObject, action: string, o2: GameObject) {
+        const a = this.rules.get(action);
+        if (a) {
+            return a(o1, o2);
+        } else {
+            return false;
+        }
+    }
+
     dispatchEvent(er: GameEventRequest) {
         switch (er.event) {
             case 'shoot':
@@ -62,7 +74,6 @@ export class GameController {
                 }
                 break;
             case 'collide':
-                const e = er as CollideEventRequest;
                 const p = er.payload as Collidable & GameObject;
                 const s = er.source as CanActivelyCollide & Collidable & GameObject;
                 p.handleCollision(s);

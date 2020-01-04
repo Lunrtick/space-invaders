@@ -1,7 +1,39 @@
 import { GameController } from "./GameController";
 import { KeyboardManager } from "./KeyboardManager";
+import { Player } from "./game-objects/Player";
+import { Bullet } from "./game-objects/Bullet";
+import { Enemy } from "./game-objects/Enemy";
 
 const game_canvas = document.getElementById('game') as HTMLCanvasElement;
+
+const game_rules = new Map<string, RuleFunction>();
+
+game_rules.set('collide', (o1, o2) => {
+    if (o1 instanceof Bullet) {
+        return o1.source.allowedTo('hit', o2);
+    } else if (o2 instanceof Bullet) {
+        return o2.source.allowedTo('hit', o1);
+    }
+    return false;
+});
+
+game_rules.set('hit', (o1, o2) => {
+    if (o1 instanceof Player) {
+        return o2 instanceof Enemy;
+    } else if (o1 instanceof Enemy) {
+        return o2 instanceof Player;
+    }
+    return false;
+});
+
+game_rules.set('reflect', (o1, o2) => {
+    if (o1 instanceof Player) {
+        return o2 instanceof Bullet && !(o2.source instanceof Player);
+    } else if (o1 instanceof Bullet && !(o1.source instanceof Player)) {
+        return o2 instanceof Player;
+    }
+    return false;
+});
 
 const game_config: GameConfig = {
     objects: [{
@@ -25,7 +57,8 @@ const game_config: GameConfig = {
     dimensions: { width: 1000, height: 1000 },
     groups: [
         'main-enemy-group'
-    ]
+    ],
+    rules: game_rules
 
 };
 

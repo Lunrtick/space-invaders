@@ -34,17 +34,14 @@ export class EnemyGroup extends GameObjectGroup {
         });
     }
 
+    private v_max = 1;
+
     private getMoveSize() {
-        let m = 0.3 * this.getSpeedup();
-        if (m > 3) {
-            m = 3;
-        } else if (m < -3) {
-            m = -3;
-        }
+        let m = this.v_max / 2 + this.v_max / 2 * (1 - this.objects.size / this.max_members);
         return m;
     }
 
     private getSpeedup() {
-        return this.max_members / this.objects.size;
+        return this.max_members / this.objects.size * 0.7;
     }
 }

@@ -1,14 +1,24 @@
 import { GameObject } from "./GameObject";
 import { GameController } from "../GameController";
-export class Bullet extends GameObject implements Renderable, CanActivelyCollide, Collidable {
-    handleCollision(source: GameObject): void {
-        this.health -= 1;
-    }
-    protected capabilities: GameObjectCapabilities = {
-        render: true,
-        act: true
-    };
+import { degToRad } from "../utils/index";
+import { Player } from "./Player";
 
+export class Bullet extends GameObject implements Renderable, CanActivelyCollide, Collidable {
+
+    handleCollision(source: GameObject): void {
+        if (this.allowedTo('reflect', source)) {
+            this.bearing += 180;
+            this.source = source;
+        }
+        else if (this.allowedTo('collide', source)) {
+            this.health -= 1;
+        }
+    }
+    protected capabilities: GameObjectCapabilities = new Set([
+        'render',
+        'act',
+        'collide',
+    ]);
     public source: GameObject;
 
     constructor(options: GameObjectOptions, gc: GameController, ctx: CanvasRenderingContext2D, source: GameObject) {
@@ -24,7 +34,6 @@ export class Bullet extends GameObject implements Renderable, CanActivelyCollide
     act(time_step: number) {
         const collisions = this.listCollisions();
         collisions.forEach(c => {
-            console.log(c);
             this.game_controller.dispatchEvent({
                 event: 'collide',
                 payload: c,
@@ -39,9 +48,7 @@ export class Bullet extends GameObject implements Renderable, CanActivelyCollide
 
     listCollisions() {
         return Array.from(this.game_controller.getGameObjects()).reduce((acc, [id, o]) => {
-            if (
-                o.constructor.name !== this.source.constructor.name
-                && o instanceof GameObject &&
+            if (o instanceof GameObject &&
                 o.can('collide') && o.willCollide(this, o)) {
                 acc.push(o);
             }
