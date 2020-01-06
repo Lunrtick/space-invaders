@@ -9,9 +9,7 @@ function getId() {
 }
 
 export class GameObjectGroup {
-    protected capabilities: GameObjectCapabilities = {
-        act: true
-    };
+    protected capabilities: GameObjectCapabilities = new Set(['act']);
 
     public name: string;
 
@@ -35,7 +33,7 @@ export class GameObjectGroup {
     };
 
     can(action: string): boolean {
-        return this.capabilities[action];
+        return this.capabilities.has(action);
     }
 
     constructor(name: string, gc: GameController, ctx: CanvasRenderingContext2D) {
@@ -93,6 +91,10 @@ export class GameObjectGroup {
 
     isDead() {
         return this.objects.size === 0;
+    }
+
+    handleEvents(er: GameEventRequest[]) {
+
     }
 
     destroy() {

@@ -29,7 +29,7 @@ export class EnemyGroup extends GameObjectGroup {
         this.objects.forEach(o => {
             o.x += move;
             if (o instanceof Enemy) {
-                o.shoot(this.getSpeedup() * 0.0005);
+                o.act(time_step, false);
             }
         });
     }

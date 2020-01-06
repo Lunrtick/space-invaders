@@ -11,6 +11,7 @@ function getId() {
 export class GameObject {
     protected capabilities: GameObjectCapabilities = new Set([
         'act',
+        'render'
     ]);
 
     public group?: string;
@@ -23,6 +24,11 @@ export class GameObject {
     protected mass: number;
     protected velocity: number = 0;
     protected v_max: number = 10e9;
+    setVelocity(new_v: number) {
+        if (new_v < this.v_max) {
+            this.velocity = new_v;
+        }
+    }
 
     public x: number;
     public y: number;
@@ -47,7 +53,7 @@ export class GameObject {
         this.width = options.width;
         this.height = options.height;
         this.shape = options.shape ?? 'square';
-        this.bearing = options.bearing ?? 90; // horizontal to the right
+        this.bearing = options.bearing ?? 0; // horizontal to the right
 
         this.game_controller = gc;
 
@@ -58,6 +64,11 @@ export class GameObject {
 
     act(time_step: number) {
 
+    }
+
+    render() {
+        this.rendering_context.fillStyle = this.getColour();
+        this.rendering_context.fillRect(this.x, this.y, this.width, this.height);
     }
 
     allowedTo(action: string, o: GameObject) {
@@ -72,16 +83,35 @@ export class GameObject {
         return this.capabilities.has(action);
     }
 
+    getCenter() {
+        return {
+            x: this.x + this.width / 2,
+            y: this.y + this.height / 2
+        };
+    }
+
+    getColour(): string {
+        return '#fff';
+    }
+
     isOutOfBox(xMin: number, xMax: number, yMin: number, yMax: number) {
         return this.x < xMin || this.x > xMax || this.y < yMin || this.y > yMax;
     }
 
-    getDeltaX(velocity: number, bearing: number, time_step: number) {
+    static getDeltaX(velocity: number, bearing: number, time_step: number) {
         return velocity * Math.cos(bearing * degToRad) * time_step;
     }
 
-    getDeltaY(velocity: number, bearing: number, time_step: number) {
+    static getDeltaY(velocity: number, bearing: number, time_step: number) {
         return velocity * Math.sin(bearing * degToRad) * time_step;
+    }
+
+    getDeltaX(time_step: number) {
+        return this.velocity * Math.cos(this.bearing * degToRad) * time_step;
+    }
+
+    getDeltaY(time_step: number) {
+        return this.velocity * Math.sin(this.bearing * degToRad) * time_step;
     }
 
     willCollide(r1: Rectangle, r2: Rectangle) {
@@ -97,6 +127,10 @@ export class GameObject {
         } else {
             throw new Error('circle?');
         }
+    }
+
+    handleEvents(er: GameEventRequest[]) {
+
     }
 
     destroy() {

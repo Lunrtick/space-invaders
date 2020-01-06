@@ -5,11 +5,14 @@ import { Bullet, createBullet } from "./game-objects/Bullet";
 import { Enemy } from "./game-objects/Enemy";
 import { GameObjectGroup } from "./game-objects/GameObjectGroup";
 import { EnemyGroup } from "./game-objects/EnemyGroup";
+import { LaserEnemy } from "./game-objects/LaserEnemy";
+import { createLaser, Laser } from "./game-objects/Laser";
+import { SniperEnemy } from './game-objects/SniperEnemy';
 
 export class GameController {
     private drawing_canvas: HTMLCanvasElement;
     private objects: Map<string, GameObject | GameObjectGroup> = new Map;
-    private event_queue: GameEvent[] = [];
+    private events: GameEventRequest[] = [];
 
     public scale: { x: number; y: number; };
 
@@ -41,6 +44,22 @@ export class GameController {
         return this.objects;
     }
 
+    updateRule(rule: string, f: RuleFunction) {
+        this.rules.set(rule, f);
+    }
+
+
+    getLineToTarget(o1: GameObject, o2: GameObject): { distance: number; bearing: number; } {
+
+        const c1 = o1.getCenter();
+        const c2 = o2.getCenter();
+
+        return {
+            distance: Math.sqrt((c1.x - c2.x) ^ 2 + (c1.y - c2.y) ^ 2),
+            bearing: Math.atan2(c1.y - c2.y, c1.x - c2.x) * 180 / Math.PI
+        };
+    }
+
     private adjustConfig(game_config: GameConfig, canvas: HTMLCanvasElement) {
         const scale = this.scale;
         return {
@@ -65,19 +84,19 @@ export class GameController {
     }
 
     dispatchEvent(er: GameEventRequest) {
-        switch (er.event) {
-            case 'shoot':
-                const ctx = this.drawing_canvas.getContext('2d');
-                if (ctx) {
-                    const nb = createBullet(er.payload, er.source, this, this.scale, ctx);
-                    this.objects.set(nb.id, nb);
-                }
-                break;
-            case 'collide':
-                const p = er.payload as Collidable & GameObject;
-                const s = er.source as CanActivelyCollide & Collidable & GameObject;
-                p.handleCollision(s);
-                s.handleCollision(p);
+        this.events.push(er);
+    }
+
+    createObject(er: GameEventRequest) {
+        const ctx = this.drawing_canvas.getContext('2d');
+        if (ctx) {
+            if (er.payload.type === 'bullet') {
+                const nb = createBullet(er.payload, er.source, this, this.scale, ctx, er.payload?.colour);
+                this.objects.set(nb.id, nb);
+            } else if (er.payload.type === 'laser') {
+                const nb = createLaser(er.payload, er.source, er.payload.target, this, this.scale, ctx);
+                this.objects.set(nb.id, nb);
+            }
         }
     }
 
@@ -93,6 +112,14 @@ export class GameController {
                     case 'enemy':
                         const ne = new Enemy(o, this, ctx);
                         this.objects.set(ne.id, ne);
+                        break;
+                    case 'laser-enemy':
+                        const nle = new LaserEnemy(o, this, ctx);
+                        this.objects.set(nle.id, nle);
+                        break;
+                    case 'sniper-enemy':
+                        const nse = new SniperEnemy(o, this, ctx);
+                        this.objects.set(nse.id, nse);
                         break;
                 }
             });
@@ -143,6 +170,11 @@ export class GameController {
                 o.act(this.time_step);
             }
         });
+
+        this.objects.forEach(o => {
+            o.handleEvents(this.events);
+        });
+        this.events = [];
 
         this.removeDeadGameObjects();
 

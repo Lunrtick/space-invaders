@@ -1,8 +1,8 @@
 type Shape = 'square' | 'round';
 
-type GameEvent = 'shoot' | 'collide';
+type GameEvent = 'shoot' | 'collide' | 'death';
 
-type GameObjectType = 'player' | 'enemy' | 'bullet';
+type GameObjectType = 'player' | 'enemy' | 'bullet' | 'laser-enemy' | 'laser' | 'sniper-enemy';
 
 type Nullable<T> = T | null;
 
@@ -44,18 +44,21 @@ interface GameEventRequest {
     payload: any;
 }
 
-interface BulletSpec {
+type ShotType = 'bullet' | 'laser';
+
+interface ShootSpec {
+    type: ShotType;
     x: number;
     y: number;
     bearing: number;
 }
 
-interface ShootEventRequest {
+interface ShootEventRequest extends GameEventRequest {
     event: 'shoot';
-    payload: BulletSpec;
+    payload: ShootSpec;
 }
 
-interface CollideEventRequest {
+interface CollideEventRequest extends GameEventRequest {
     event: 'collide';
     payload: import('./game-objects/GameObject').GameObject;
 }

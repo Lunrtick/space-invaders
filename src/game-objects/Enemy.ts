@@ -1,18 +1,16 @@
 import { GameObject } from "./GameObject";
 import { Player } from './Player';
-import { degToRad } from '../utils/index';
 
 export class Enemy extends GameObject implements Collidable {
 
-    handleCollision(source: GameObject & CanActivelyCollide): void {
+    handleCollision(source: GameObject): void {
         if (this.allowedTo('collide', source)) {
             this.health -= 1;
         }
     }
-    protected v_max = 30;
+    protected v_max = 40;
 
-    private step = 0;
-
+    public prev_bear: Nullable<number> = null;
     protected capabilities: GameObjectCapabilities = new Set([
         'render',
         'act',
@@ -38,50 +36,70 @@ export class Enemy extends GameObject implements Collidable {
         this.renderDamage();
     }
 
-    act(time_step: number) {
-        const bounding_dims = this.game_controller.getBoundingDimensions();
+    act(time_step: number, should_move = true) {
+        if (should_move) {
+            const bounding_dims = this.game_controller.getBoundingDimensions();
+            if (this.bearing != this.prev_bear) {
+                this.prev_bear = this.bearing;
+            }
 
-        this.step += 1;
+            this.velocity = this.v_max;
 
-        this.velocity = this.v_max;
 
-        if (this.step > 60) {
-            const jump_distance = bounding_dims.x.max / 10;
-            const x_res = this.x + Math.cos(this.bearing) * jump_distance;
+            const x_res = this.x + this.getDeltaX(time_step);
+
             if (x_res > bounding_dims.x.max - this.width || x_res < bounding_dims.x.min) {
-                this.bearing += 180 * degToRad;
-                this.x = this.x + Math.cos(this.bearing) * jump_distance;
+                this.bearing += 180;
+                this.x = this.x + this.getDeltaX(time_step);
             } else {
                 this.x = x_res;
             }
-            this.step = 0;
-            if (this.health < this.max_health) {
-                this.y += bounding_dims.y.max / 20;
+
+            const y_res = this.y + this.getDeltaY(time_step);
+
+            if (y_res > bounding_dims.y.max - this.height || y_res < bounding_dims.y.min) {
+                this.bearing += 180;
+                this.y = this.y + this.getDeltaY(time_step);
+            } else {
+                this.y = y_res;
             }
-
-            this.shoot(0.4);
-
+            this.bearing += 1;
         }
+        this.shoot(0.0005);
     }
 
     public shoot(chance = 0.0005) {
         if (Math.random() < chance) {
-            this.game_controller.dispatchEvent({
+            const center = this.getCenter();
+            this.game_controller.createObject({
                 source: this,
                 event: 'shoot',
                 payload: {
-                    x: this.x + this.width / 2 - 12 * this.game_controller.scale.x,
-                    y: this.y,
+                    type: 'bullet',
+                    x: center.x,
+                    y: center.y,
                     bearing: 270 + Math.random() * 50 * this.getPosOrNeg(),
-                    collides_with: new Set([Player.name]),
-                    doesnt_collide_with: new Set([this.constructor.name])
-                } as BulletSpec
+                    colour: '#ff0000'
+                } as ShootSpec
             });
         }
     }
 
-    private getPosOrNeg() {
+    protected getPosOrNeg() {
         return Math.random() > 0.5 ? 1 : -1;
+    }
+
+    handleEvents(er: GameEventRequest[]) {
+        er.forEach(er => {
+            switch (er.event) {
+                case 'collide':
+                    const c = er as CollideEventRequest;
+                    if (c.payload === this) {
+                        this.handleCollision(c.source);
+                    }
+                    break;
+            }
+        });
     }
 }
 
