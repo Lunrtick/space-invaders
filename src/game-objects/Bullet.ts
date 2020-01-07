@@ -67,7 +67,6 @@ export class Bullet extends GameObject implements Renderable, CanActivelyCollide
     }
 
     destroy() {
-        console.log("Ded Bullet");
     }
 
     handleEvents(er: GameEventRequest[]) {

@@ -5,7 +5,17 @@ import { Bullet } from "./game-objects/Bullet";
 import { Enemy } from "./game-objects/Enemy";
 import { Laser } from "./game-objects/Laser";
 
+
 const game_canvas = document.getElementById('game') as HTMLCanvasElement;
+const game_container = document.getElementById('game-container') as HTMLDivElement;
+
+function resizeCanvas() {
+    game_canvas.height = game_canvas.width;
+}
+
+resizeCanvas();
+
+document.addEventListener('resize', resizeCanvas);
 
 const game_rules = new Map<string, RuleFunction>();
 
@@ -14,6 +24,8 @@ game_rules.set('collide', (o1, o2) => {
         return o1.source.allowedTo('hit', o2);
     } else if (o2 instanceof Bullet || o2 instanceof Laser) {
         return o2.source.allowedTo('hit', o1);
+    } else if ((o1 instanceof Enemy && o2 instanceof Player) || (o1 instanceof Player && o2 instanceof Enemy)) {
+        return o1.allowedTo('hit', o2);
     }
     return false;
 });
@@ -38,7 +50,7 @@ const game_config: GameConfig = {
         width: 48,
         height: 48,
         mass: 3,
-        max_health: 12,
+        max_health: 3,
         type: 'player'
     },
     {
@@ -65,7 +77,7 @@ for (let i = 0; i < Math.random() * 4; i++) {
         width: 48,
         height: 48,
         mass: 3,
-        max_health: 5,
+        max_health: 2,
         type: 'laser-enemy'
     });
 }
@@ -94,6 +106,8 @@ for (let i = 0; i < (game_config.dimensions.width - 150) / 50; i++) {
 }
 
 const gc = new GameController(game_canvas, game_config, new KeyboardManager());
-window.GameController = gc;
+
+Object.defineProperty(window, 'GameController', gc);
+
 gc.initGameObjects();
 gc.run();

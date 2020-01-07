@@ -28,7 +28,6 @@ export class Laser extends GameObject implements Renderable, CanActivelyCollide,
 
     constructor(options: GameObjectOptions, gc: GameController, ctx: CanvasRenderingContext2D, source: GameObject, target: GameObject) {
         super(options, gc, ctx);
-        console.log('new laser');
         this.source = source;
         this.created_at = Date.now();
         this.target = target;
@@ -117,7 +116,6 @@ export class Laser extends GameObject implements Renderable, CanActivelyCollide,
             event: 'death',
             payload: null
         });
-        console.log("Ded Lazer");
     }
 
 }

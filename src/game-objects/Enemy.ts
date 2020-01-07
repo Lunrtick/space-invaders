@@ -1,7 +1,7 @@
 import { GameObject } from "./GameObject";
 import { Player } from './Player';
 
-export class Enemy extends GameObject implements Collidable {
+export class Enemy extends GameObject implements Collidable, CanActivelyCollide {
 
     handleCollision(source: GameObject): void {
         if (this.allowedTo('collide', source)) {
@@ -10,7 +10,6 @@ export class Enemy extends GameObject implements Collidable {
     }
     protected v_max = 40;
 
-    public prev_bear: Nullable<number> = null;
     protected capabilities: GameObjectCapabilities = new Set([
         'render',
         'act',
@@ -18,7 +17,29 @@ export class Enemy extends GameObject implements Collidable {
     ]);
 
     getColour(): string {
-        return 'rgb(123, 80, 200)';
+        return this.group ? 'rgb(123, 80, 200)' : '#dd2200';
+    }
+
+    dispatchCollisions() {
+        const collisions = this.listCollisions();
+        collisions.forEach(c => {
+            this.game_controller.dispatchEvent({
+                event: 'collide',
+                payload: c,
+                source: this
+            });
+        });
+    }
+
+    listCollisions() {
+        return Array.from(this.game_controller.getGameObjects()).reduce((acc, [id, o]) => {
+            if (o instanceof GameObject
+                && o !== this &&
+                o.can('collide') && o.willCollide(this, o)) {
+                acc.push(o);
+            }
+            return acc;
+        }, [] as GameObject[]);
     }
 
     renderDamage() {
@@ -36,16 +57,23 @@ export class Enemy extends GameObject implements Collidable {
         this.renderDamage();
     }
 
+    getBearingToPlayer() {
+        let bearing_to_player = null;
+        this.game_controller.getGameObjects().forEach(o => {
+            if (o instanceof Player) {
+                bearing_to_player = this.game_controller.getLineToTarget(this, o).bearing;
+            }
+        });
+        return bearing_to_player;
+    }
+
     act(time_step: number, should_move = true) {
         if (should_move) {
             const bounding_dims = this.game_controller.getBoundingDimensions();
-            if (this.bearing != this.prev_bear) {
-                this.prev_bear = this.bearing;
-            }
 
             this.velocity = this.v_max;
 
-
+            this.bearing = this.getBearingToPlayer() ?? this.bearing;
             const x_res = this.x + this.getDeltaX(time_step);
 
             if (x_res > bounding_dims.x.max - this.width || x_res < bounding_dims.x.min) {
@@ -65,10 +93,12 @@ export class Enemy extends GameObject implements Collidable {
             }
             this.bearing += 1;
         }
-        this.shoot(0.0005);
+        this.shoot();
+        this.leaveGroup();
+        this.dispatchCollisions();
     }
 
-    public shoot(chance = 0.0005) {
+    shoot(chance = 0.0005) {
         if (Math.random() < chance) {
             const center = this.getCenter();
             this.game_controller.createObject({
@@ -85,6 +115,13 @@ export class Enemy extends GameObject implements Collidable {
         }
     }
 
+    leaveGroup(chance = 0.0001) {
+        if (Math.random() < chance && this.group !== undefined) {
+            this.group = undefined;
+            this.v_max += Math.random() * 40;
+        }
+    }
+
     protected getPosOrNeg() {
         return Math.random() > 0.5 ? 1 : -1;
     }
@@ -96,6 +133,8 @@ export class Enemy extends GameObject implements Collidable {
                     const c = er as CollideEventRequest;
                     if (c.payload === this) {
                         this.handleCollision(c.source);
+                    } else if (c.source === this && c.payload instanceof Player) {
+                        this.handleCollision(c.payload);
                     }
                     break;
             }

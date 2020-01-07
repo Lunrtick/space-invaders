@@ -103,8 +103,10 @@ export class Player extends GameObject implements Renderable, Interactive, Colli
                 return false;
             });
         }
+    }
 
-
+    isMovingFastEnoughToAvoidDamageFromEnemyCollisions() {
+        return this.velocity / this.v_max > 0.75;
     }
 
     canShoot() {
@@ -162,8 +164,11 @@ export class Player extends GameObject implements Renderable, Interactive, Colli
 
         }
         else if (this.allowedTo('collide', source)) {
-            console.log('ouch');
-            this.health -= 1;
+            if (source instanceof Enemy && this.isMovingFastEnoughToAvoidDamageFromEnemyCollisions()) {
+                console.log('Huzzah!');
+            } else {
+                this.health -= 1;
+            }
         }
     }
 

@@ -6,10 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Space Invaders Test</title>
+    <link rel="stylesheet" href="src/main.scss">
 </head>
 
-<body>
-    <canvas id="game" style="width: 800px; height: 800px;"></canvas>
+<body style="overflow: hidden;">
+    <div class="columns is-centered">
+        <div id="game-container" class="column is-half-fullhd is-three-quarters">
+            <canvas id="game" style="width: 100%;"></canvas>
+        </div>
+    </div>
     <script src="src/index.ts"></script>
 </body>
 
