@@ -15,11 +15,19 @@ export class LaserEnemy extends Enemy implements Collidable {
         'collide',
     ]);
 
+    render() {
+        this.rendering_context.drawImage(document.getElementById('enemy_laser') as HTMLImageElement, this.x, this.y, this.width, this.height);
+
+        this.renderDamage();
+    }
+
     getColour(): string {
         return 'rgb(123, 80, 200)';
     }
 
     private shoot_chance = 0;
+
+
 
     act(time_step: number) {
         if (this.laser_object instanceof Laser) {

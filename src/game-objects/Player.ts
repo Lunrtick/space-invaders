@@ -1,7 +1,6 @@
 import { GameObject } from "./GameObject";
 import { Enemy } from './Enemy';
 import { Bullet } from "./Bullet";
-
 export class Player extends GameObject implements Renderable, Interactive, Collidable {
     protected capabilities: GameObjectCapabilities = new Set([
         'render',
@@ -24,6 +23,12 @@ export class Player extends GameObject implements Renderable, Interactive, Colli
 
     private act_count = 0;
 
+    playShootingSound() {
+        const sound = new Audio('http://localhost:8002/silencer.mp3');
+        sound.play();
+    }
+
+
     private shouldBeInvulnerable() {
         const now = Date.now();
         const li = this.last_invulnerable ?? 0;
@@ -37,10 +42,10 @@ export class Player extends GameObject implements Renderable, Interactive, Colli
     }
 
     renderDamage() {
-        this.rendering_context.fillStyle = 'rgb(0, 0, 0)';
+        this.rendering_context.fillStyle = 'rgb(255, 0, 255)';
         const damage_width = this.width / this.max_health;
         for (let i = 0; i < this.max_health - this.health; i++) {
-            this.rendering_context.fillRect(this.x + i * damage_width, this.y, damage_width, this.height / 3);
+            this.rendering_context.fillRect(this.x + i * damage_width + 2 * this.width, this.y, damage_width, this.height / 3);
         }
     }
 
@@ -48,19 +53,13 @@ export class Player extends GameObject implements Renderable, Interactive, Colli
         this.rendering_context.fillStyle = 'rgb(60, 60, 60)';
         const r_width = this.width / this.max_ammo;
         for (let i = 0; i < this.ammo; i++) {
-            this.rendering_context.fillRect(this.x + i * r_width, this.height / 3 * 2 + this.y, r_width, this.height / 3);
+            this.rendering_context.fillRect(this.x + i * r_width - 2 * this.width, this.height / 3 * 2 + this.y, r_width, this.height / 3);
         }
     }
 
     render() {
-        if (this.is_invulnerable) {
-            this.rendering_context.fillStyle = 'rgb(255,0,255)';
-        } else if (this.canGoInvulnerable()) {
-            this.rendering_context.fillStyle = 'rgb(255,255,255)';
-        } else {
-            this.rendering_context.fillStyle = 'rgb(255,0,0)';
-        }
-        this.rendering_context.fillRect(this.x, this.y, this.width, this.height);
+
+        this.rendering_context.drawImage(document.getElementById('player_ship_image') as HTMLImageElement, this.x, this.y, this.width, this.height);
 
         this.renderDamage();
         this.renderAmmo();
@@ -89,6 +88,7 @@ export class Player extends GameObject implements Renderable, Interactive, Colli
                 } as ShootSpec
             });
             this.ammo -= 1;
+            this.playShootingSound();
         }
 
         if (ncks.has('ArrowUp') && this.canGoInvulnerable()) {

@@ -25,6 +25,17 @@ export class Laser extends GameObject implements Renderable, CanActivelyCollide,
     private sighted = false;
     private hit = false;
 
+    private playing_shooting_sound = false;
+    playShootingSound() {
+        if (!this.playing_shooting_sound) {
+            this.playing_shooting_sound = true;
+            const sound = new Audio('http://localhost:8002/gabe-beep-laser.mp3');
+            sound.addEventListener('ended', () => {
+                this.playing_shooting_sound = false;
+            });
+            sound.play();
+        }
+    }
 
     constructor(options: GameObjectOptions, gc: GameController, ctx: CanvasRenderingContext2D, source: GameObject, target: GameObject) {
         super(options, gc, ctx);
@@ -56,6 +67,7 @@ export class Laser extends GameObject implements Renderable, CanActivelyCollide,
         if (now - this.created_at > 1450) {
             this.health = 0;
         } else {
+            this.playShootingSound();
             if (now - this.created_at > 1400) {
                 this.active = true;
             } else if (now - this.created_at < 1200) {

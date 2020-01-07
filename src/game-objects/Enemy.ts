@@ -43,7 +43,7 @@ export class Enemy extends GameObject implements Collidable, CanActivelyCollide 
     }
 
     renderDamage() {
-        this.rendering_context.fillStyle = 'rgb(0, 0, 0)';
+        this.rendering_context.fillStyle = '#00000085';
         const damage_width = this.width / this.max_health;
         for (let i = 0; i < this.max_health - this.health; i++) {
             this.rendering_context.fillRect(this.x + i * damage_width, this.y, damage_width, this.height - 2);
@@ -51,8 +51,7 @@ export class Enemy extends GameObject implements Collidable, CanActivelyCollide 
     }
 
     render() {
-        this.rendering_context.fillStyle = this.getColour();
-        this.rendering_context.fillRect(this.x, this.y, this.width, this.height);
+        this.rendering_context.drawImage(document.getElementById('enemy_basic') as HTMLImageElement, this.x, this.y, this.width, this.height);
 
         this.renderDamage();
     }

@@ -133,7 +133,13 @@ export class GameObject {
 
     }
 
+    playDamageSound() {
+
+    }
+
     destroy() {
-        console.log(`${this.id} says baaaaaii`);
+        const sound = new Audio('http://localhost:8002/blast.mp3');
+        sound.volume = 0.2;
+        sound.play();
     }
 }

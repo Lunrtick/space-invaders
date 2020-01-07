@@ -16,7 +16,7 @@ export class Bullet extends GameObject implements Renderable, CanActivelyCollide
         }
     }
 
-    protected v_max = 60;
+    protected v_max: number;
 
     private colour: string;
 
@@ -30,10 +30,11 @@ export class Bullet extends GameObject implements Renderable, CanActivelyCollide
     ]);
     public source: GameObject;
 
-    constructor(options: GameObjectOptions, gc: GameController, ctx: CanvasRenderingContext2D, source: GameObject, colour?: string) {
+    constructor(options: GameObjectOptions, gc: GameController, ctx: CanvasRenderingContext2D, source: GameObject, colour?: string, v_max?: number) {
         super(options, gc, ctx);
         this.source = source;
         this.colour = colour ?? 'rgb(0, 255, 0)';
+        this.v_max = v_max ?? 60;
     }
 
     act(time_step: number) {
@@ -85,7 +86,7 @@ export class Bullet extends GameObject implements Renderable, CanActivelyCollide
 }
 
 
-export function createBullet(b: ShootSpec, source: GameObject, gc: GameController, scale: { x: number, y: number; }, ctx: CanvasRenderingContext2D, colour?: string) {
+export function createBullet(b: ShootSpec, source: GameObject, gc: GameController, scale: { x: number, y: number; }, ctx: CanvasRenderingContext2D, colour?: string, v_max?: number) {
     const { x: scaleX, y: scaleY } = scale;
     return new Bullet({
         height: 2,
@@ -97,5 +98,5 @@ export function createBullet(b: ShootSpec, source: GameObject, gc: GameControlle
         bearing: b.bearing,
         shape: "square",
         type: 'bullet'
-    }, gc, ctx, source, colour);
+    }, gc, ctx, source, colour, v_max);
 }

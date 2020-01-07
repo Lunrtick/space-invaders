@@ -19,6 +19,18 @@ export class SniperEnemy extends Enemy implements Collidable {
 
     private shoot_chance = 0;
 
+    playShootingSound() {
+        const sound = new Audio('http://localhost:8002/gabe-alien-sniper.mp3');
+        sound.play();
+
+    }
+
+    render() {
+        this.rendering_context.drawImage(document.getElementById('enemy_sniper') as HTMLImageElement, this.x, this.y, this.width, this.height);
+
+        this.renderDamage();
+    }
+
     act(time_step: number, should_move = true) {
         if (should_move) {
             const bounding_dims = this.game_controller.getBoundingDimensions();
@@ -68,6 +80,7 @@ export class SniperEnemy extends Enemy implements Collidable {
 
     public shoot(chance = 0.0005) {
         if (Math.random() < chance) {
+            this.playShootingSound();
             this.shoot_chance = 0;
             const go = this.game_controller.getGameObjects();
             const center = this.getCenter();
@@ -83,7 +96,8 @@ export class SniperEnemy extends Enemy implements Collidable {
                             x: center.x,
                             y: center.y,
                             bearing: t.bearing,
-                            colour: '#ffff00'
+                            colour: '#ffff00',
+                            v_max: 120
                         } as ShootSpec
                     });
                 }

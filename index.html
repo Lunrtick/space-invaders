@@ -9,9 +9,15 @@
     <link rel="stylesheet" href="src/main.scss">
 </head>
 
-<body style="overflow: hidden;">
-    <div class="columns is-centered">
-        <div id="game-container" class="column is-half-fullhd is-three-quarters">
+<body style="overflow: none;">
+    <div style="display: none;">
+        <img id="player_ship_image" src="src/assets/Player/playerShip2_orange.png" alt="">
+        <img id="enemy_basic" src="src/assets/Enemies/enemyRed1.png" alt="">
+        <img id="enemy_sniper" src="src/assets/Enemies/enemyBlue4.png" alt="">
+        <img id="enemy_laser" src="src/assets/Enemies/enemyBlue3.png" alt="">
+    </div>
+    <div class="columns is-centered" style="padding-bottom: 0px;">
+        <div id="game-container" class="column is-half-fullhd is-three-quarters" style="padding-bottom: 0px;">
             <canvas id="game" style="width: 100%;"></canvas>
         </div>
     </div>

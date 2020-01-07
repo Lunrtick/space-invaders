@@ -91,7 +91,7 @@ export class GameController {
         const ctx = this.drawing_canvas.getContext('2d');
         if (ctx) {
             if (er.payload.type === 'bullet') {
-                const nb = createBullet(er.payload, er.source, this, this.scale, ctx, er.payload?.colour);
+                const nb = createBullet(er.payload, er.source, this, this.scale, ctx, er.payload?.colour, er.payload?.v_max);
                 this.objects.set(nb.id, nb);
             } else if (er.payload.type === 'laser') {
                 const nb = createLaser(er.payload, er.source, er.payload.target, this, this.scale, ctx);
